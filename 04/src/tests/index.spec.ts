@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { determineIfAssignmentsAreInclusive } from '../index';
+import { determineIfAssignmentsAreInclusive, determineIfAssignmentsOverlap } from '../index';
 
 describe(`Day 4`, () => {
   describe(`data`, () => {
@@ -39,6 +39,31 @@ describe(`Day 4`, () => {
       testAssignments.forEach(({ranges, expectedResult}) => {
         const {assignmentsFullyContained: actualResult} = determineIfAssignmentsAreInclusive(ranges)
         const compValue = expectedResult === 'inclusive';
+        expect(compValue).to.equal(actualResult);
+      });
+    });
+  });
+
+  describe(`determineIfAssignmentsOverlap`, () => {
+    it(`should correctly calculate overlapping ranges`, () => {
+      interface AssignmentTest {
+        readonly ranges: string;
+        readonly expectedResult: 'overlap' | 'no-overlappy'
+      }
+
+      const testAssignments: AssignmentTest[] = [
+        {ranges: '2-4,1-5', expectedResult: 'overlap'},
+        {ranges: '2-4,3-5', expectedResult: 'overlap'},
+        {ranges: '1-5,2-4', expectedResult: 'overlap'},
+        {ranges: '200-400,1-5', expectedResult: 'no-overlappy'},
+        {ranges: '2-400,400-500', expectedResult: 'overlap'},
+        {ranges: '1-400,100-105', expectedResult: 'overlap'},
+        {ranges: '1-400,401-505', expectedResult: 'no-overlappy'},
+      ];
+
+      testAssignments.forEach(({ranges, expectedResult}) => {
+        const {assignmentsOverlap: actualResult} = determineIfAssignmentsOverlap(ranges)
+        const compValue = expectedResult === 'overlap';
         expect(compValue).to.equal(actualResult);
       });
     });

@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
-interface PartnerAssignment {
+interface PartnerAssignmentInclusivityModel {
   readonly rangeOne: string;
   readonly rangeTwo: string;
   readonly rangeOneInsideRangeTwo: boolean;
@@ -9,7 +9,13 @@ interface PartnerAssignment {
   readonly assignmentsFullyContained: boolean;
 }
 
-export const determineIfAssignmentsAreInclusive = (partnerAssignments: string): PartnerAssignment => {
+interface PartnerAssignmentOverlapModel {
+  readonly rangeOne: string;
+  readonly rangeTwo: string;
+  readonly assignmentsOverlap: boolean;
+}
+
+export const determineIfAssignmentsAreInclusive = (partnerAssignments: string): PartnerAssignmentInclusivityModel => {
   const [rangeOne, rangeTwo ] = partnerAssignments.split(',');
   const [lowNumberOne, highNumberOne] = rangeOne.split('-').map(Number);
   const [lowNumberTwo, highNumberTwo] = rangeTwo.split('-').map(Number);
@@ -24,17 +30,39 @@ export const determineIfAssignmentsAreInclusive = (partnerAssignments: string): 
   }
 }
 
+export const determineIfAssignmentsOverlap = (partnerAssignments: string): PartnerAssignmentOverlapModel => {
+  const [rangeOne, rangeTwo ] = partnerAssignments.split(',');
+  const [lowNumberOne, highNumberOne] = rangeOne.split('-').map(Number);
+  const [lowNumberTwo, highNumberTwo] = rangeTwo.split('-').map(Number);
+  const lowestNumber = Math.min(lowNumberOne, lowNumberTwo);
+  const highestNumber = Math.max(highNumberOne, highNumberTwo);
+  let assignmentsOverlap = false;
+  for (let i = lowestNumber; i <= highestNumber; i++) {
+    const indexInOne = i >= lowNumberOne && i <= highNumberOne;
+    const indexInTwo = i >= lowNumberTwo && i <= highNumberTwo;
+    if (indexInOne && indexInTwo) {
+      assignmentsOverlap = true;
+      break;
+    }
+  }
+  return {
+    rangeOne,
+    rangeTwo,
+    assignmentsOverlap
+  }
+}
+
 export const main = (): number => {
   // read in the file
   const rawFileData = readFileSync(resolve(__dirname, 'section-assignments.txt'));
   // parse it
   const sectionAssignmentsData = rawFileData.toString().split('\n').filter(x => !!x);
   // get data about each row
-  const partnerAssigments = sectionAssignmentsData.map(determineIfAssignmentsAreInclusive);
+  const partnerAssigments = sectionAssignmentsData.map(determineIfAssignmentsOverlap);
   // how many assignment pairs does one range fully contain the other
-  const containedAssignmentsCount = partnerAssigments.filter(({assignmentsFullyContained}) => assignmentsFullyContained).length;
-  console.log({containedAssignmentsCount});
-  return containedAssignmentsCount;
+  const overlappingAssigmentsCount = partnerAssigments.filter(({assignmentsOverlap}) => assignmentsOverlap).length;
+  console.log({containedAssignmentsCount: overlappingAssigmentsCount});
+  return overlappingAssigmentsCount;
 }
 
 // for node runs
