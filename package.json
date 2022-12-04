@@ -1,0 +1,25 @@
+{
+  "name": "advent-of-code",
+  "version": "1.0.0",
+  "description": "",
+  "main": "scaffolding/index.ts",
+  "scripts": {
+    "prescaffold": "npm i && npx rimraf new-directory-rename-me && mkdir new-directory-rename-me",
+    "scaffold": "copyfiles -u 1 -a scaffolding/**/*.* new-directory-rename-me",
+    "postscaffold": "cd new-directory-rename-me && npm i",
+    "cleanup": "npx rimraf new-directory-rename-me"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tappmax/advent-of-code.git"
+  },
+  "author": "Max Tapp",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tappmax/advent-of-code/issues"
+  },
+  "homepage": "https://github.com/tappmax/advent-of-code#readme",
+  "devDependencies": {
+    "copyfiles": "^2.4.1"
+  }
+}
