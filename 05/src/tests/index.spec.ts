@@ -1,5 +1,9 @@
-import { expect } from 'chai';
-import { getContainerAtPosition, initializeContainerMap, main } from '../index';
+import {expect} from 'chai';
+import {
+  getContainerAtPosition,
+  initializeContainerMap,
+  moveStacks,
+} from '../index';
 
 describe(`index`, () => {
   describe(`getContainerAtPosition`, () => {
@@ -17,7 +21,9 @@ describe(`index`, () => {
         [9, 'D'],
       ];
       expectedResults.forEach(([position, expectedResult]) => {
-        expect(getContainerAtPosition(input, +position)).to.equal(expectedResult);
+        expect(getContainerAtPosition(input, +position)).to.equal(
+          expectedResult
+        );
       });
     });
   });
@@ -32,7 +38,7 @@ describe(`index`, () => {
         '[J] [V] [T] [N] [F] [G] [Z] [S] [S]',
         '[C] [R] [P] [S] [V] [M] [V] [D] [Z]',
         '[F] [G] [H] [Z] [N] [P] [M] [N] [D]',
-        '1   2   3   4   5   6   7   8   9 '
+        '1   2   3   4   5   6   7   8   9 ',
       ];
       const expectedResults = JSON.stringify([
         ['F', 'C', 'J', 'P', 'H', 'T', 'W'],
@@ -43,19 +49,28 @@ describe(`index`, () => {
         ['P', 'M', 'G', 'F', 'W', 'D', 'Z'],
         ['M', 'V', 'Z', 'W', 'S', 'J', 'D', 'P'],
         ['N', 'D', 'S'],
-        ['D', 'Z', 'S', 'F', 'M']
+        ['D', 'Z', 'S', 'F', 'M'],
       ]);
-      const containerData = JSON.stringify(initializeContainerMap(input));
+      const containerData = JSON.stringify([
+        ...initializeContainerMap(input).values(),
+      ]);
       console.log({expectedResults, containerData});
       expect(containerData).to.equal(expectedResults);
-      // expectedResults.forEach((contents, i) => {
-      //   for (let col = 0; col < 9; col++) {
-      //     const expected = containerData[i][col];
-      //     const actual = contents[i][col];
-      //     expect(actual).to.equal(expected);
-      //     console.log({expected, actual });
-      //   }
-      // });
+    });
+  });
+  describe(`moveStacks`, () => {
+    it(`should move stack and retain original order`, () => {
+      const map = new Map<number, string[]>([
+        [1, ['A', 'B', 'C']],
+        [2, ['D', 'E', 'F']],
+      ]);
+      moveStacks(2, 1, 2, map);
+      const expectedStackOne = 'A';
+      const expectedStackTwo = 'DEFBC';
+      const actualStackOne = map.get(1)?.join('');
+      const actualStackTwo = map.get(2)?.join('');
+      expect(expectedStackOne).to.equal(actualStackOne);
+      expect(expectedStackTwo).to.equal(actualStackTwo);
     });
   });
 });
