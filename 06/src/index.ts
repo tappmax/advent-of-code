@@ -26,9 +26,23 @@ export const findStartOfPacket = (buffer: string): number => {
   throw new Error('No marker found');
 };
 
+export const partTwo = (buffer: string): number => {
+  // skip to the 14th position in the array
+  for (let i = 13; i < buffer.length; i++) {
+    const characterSet = new Set();
+    for (let j = 13; j >= 0; j--) {
+      characterSet.add(buffer[i - j]);
+    }
+    if (characterSet.size === 14) {
+      return i + 1;
+    }
+  }
+  throw new Error('No marker found');
+};
+
 export const main = (): number => {
   const buffer = getInputAsString();
-  console.log(findStartOfPacket(buffer));
+  console.log(partTwo(buffer));
   return 0;
 }
 
