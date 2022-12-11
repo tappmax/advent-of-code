@@ -20,18 +20,28 @@ export interface ICmdOutput {
 
 export class Directory {
   private files: IFile[] = [];
+  private children: Directory[] = [];
+  private totalFileSize = 0;
+
   constructor(
     readonly parentDirectory: Directory | null,
     readonly dirName: string
   ) {}
 
-  public getDirectorySize(): number {
-    return this.files
-      ?.map(({size}) => size)
-      ?.reduce((prev, curr) => (prev += curr), 0);
+  public addFile(file: IFile): void {
+    this.totalFileSize += file.size;
+    this.files.push(file);
   }
 
-  public addFile(file: IFile): void {
-    this.files.push(file);
+  public addChild(child: Directory): void {
+    this.children.push(child);
+  }
+
+  public getDirectorySize(): number {
+    let sum = this.totalFileSize;
+    this.children.forEach(child => {
+      sum += child.getDirectorySize();
+    });
+    return sum;
   }
 }

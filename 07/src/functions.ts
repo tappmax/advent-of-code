@@ -68,10 +68,12 @@ export const getHydratedDirectoryMap = (cmds: ICmdIO[]): ReadonlyMap<string, Dir
           // add files and directories
           const cmdOutput = nextCmd.io as ICmdOutput;
           if (cmdOutput.dirName) {
+            const newDir = new Directory(currentDirectory, cmdOutput.dirName);
             directoryMap.set(
               cmdOutput.dirName,
-              new Directory(currentDirectory, cmdOutput.dirName)
+              newDir
             );
+            currentDirectory.addChild(newDir);
           }
           if (cmdOutput.file) {
             currentDirectory.addFile(cmdOutput.file);
@@ -82,6 +84,7 @@ export const getHydratedDirectoryMap = (cmds: ICmdIO[]): ReadonlyMap<string, Dir
           if (nextCmd) {
             nextCmdIsCommand = nextCmd.isCommand;
           } else {
+            // EOF
             break;
           }
         }
