@@ -22,3 +22,10 @@ export interface TreeVisibilityModel extends Tree {
   readonly isVisibleFromBottom: boolean;
   readonly isVisibleFromLeft: boolean;
 }
+
+export interface GridBoundary {
+  readonly xMin: number;
+  readonly xMax: number;
+  readonly yMin: number;
+  readonly yMax: number;
+}
