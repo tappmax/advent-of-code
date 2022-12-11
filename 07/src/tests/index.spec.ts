@@ -46,11 +46,16 @@ describe(`Test`, () => {
           .filter(x => !!x)
           .map(stringToCmdIO)
       );
-      let sum = 0;
-      const dir = directoryMap.get('/');
-      sum = dir?.getDirectorySize() || 0;
-      expect(48381165).to.equal(sum);
-      console.log(sum);
+      
+      const expectations = new Map<string, number>([
+        ['/', 48381165],
+        ['e', 584],
+        ['a', 94853],
+        ['d', 24933642],
+      ]);
+      expectations.forEach((expected, dirName) => {
+        expect(expected).to.equal(directoryMap.get(dirName)?.getDirectorySize());
+      });
     });
   });
 });
