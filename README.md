@@ -2,6 +2,7 @@
 # About Advent of Code
 
 [Here's the site to get the daily assignments and read about what this is](https://adventofcode.com/2022)
+
 You can complete these challenges with any technology you want, I chose typescript/node/unit tests via mocha and chai.
 
 ## Scaffolding
