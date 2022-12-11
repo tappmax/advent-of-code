@@ -1,19 +1,13 @@
 import {
   getCmdIOFromFile,
+  getDirectorySum,
   getHydratedDirectoryMap,
 } from './functions';
 
-const ReportableSizeThreshold = 100000;
 
 export const main = (): number => {
   const directoryMap = getHydratedDirectoryMap(getCmdIOFromFile());
-  let sum = 0;
-  directoryMap.forEach((dir) => {
-    const dirSize = dir.getDirectorySize();
-    if (dirSize <= ReportableSizeThreshold) {
-      sum += dirSize;
-    }
-  });
+  const sum = getDirectorySum(directoryMap);
   console.log(sum);
   return 0;
 };
