@@ -30,3 +30,4 @@ I accidentally deleted the first 3 days' solutions trying to set up a branch on 
 | 05 | Complete ||
 | 06 | Complete ||
 | 07 | Stumped, didn't get part 1 answer | No clue what is wrong, all tests are passing and matching the site's data, wth |
+| 08 | Started, incomplete | already thinking of using a map instead of 2d array. I'm not smart enough for 2d arrays |
