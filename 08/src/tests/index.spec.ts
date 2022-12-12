@@ -3,7 +3,9 @@
 import {expect} from 'chai';
 import {
   calculateHorizontalVisibility,
+  getBestSpotForTheTreeHouseBasedOnScenicScore,
   getTreeMapAndGridBoundary,
+  getTreeScenicScoreMap,
   getTreeVisibilityModelMap,
   getVisibleTreesCount,
 } from '../functions';
@@ -85,6 +87,16 @@ describe(`Test`, () => {
       const visMap = getTreeVisibilityModelMap(treeMap, gridBoundary);
       const visSum = getVisibleTreesCount(visMap, 'interior-only');
       expect(5).to.equal(visSum);
+    });
+  });
+  describe(`scenic trees`, () => {
+    const {treeMap, gridBoundary} = getTreeMapAndGridBoundary(testInput);
+    const treeVisibilityModelMap = getTreeScenicScoreMap(treeMap, gridBoundary);
+    it(`find the best tree`, () => {
+      const bestTree = getBestSpotForTheTreeHouseBasedOnScenicScore(
+        treeVisibilityModelMap
+      );
+      expect(8).to.equal(bestTree.scenicScore);
     });
   });
 });

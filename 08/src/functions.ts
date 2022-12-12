@@ -6,6 +6,7 @@ import {
   GridKey,
   Tree,
   TreeHeight,
+  TreeScenicScoreModel,
   TreeVisibilityModel,
 } from './models';
 
@@ -124,7 +125,9 @@ export const calculateVerticalVisibility = (
     const currentGridKey = makeGridKey(i, column);
     const currentTree = treeMap.get(currentGridKey);
     if (currentTree === undefined) {
-      throw new Error(`Couldn't find current tree in tree map. Coords: ${currentGridKey}`);
+      throw new Error(
+        `Couldn't find current tree in tree map. Coords: ${currentGridKey}`
+      );
     }
     if (atTree && currentTree.isAtEdge) {
       isVisibleFromBottom = i === yMin;
@@ -139,7 +142,7 @@ export const calculateVerticalVisibility = (
     }
   }
   return {isVisibleFromBottom, isVisibleFromTop};
-}
+};
 
 export const calculateHorizontalVisibility = (
   treeMap: ReadonlyMap<GridKey, Tree>,
@@ -163,7 +166,9 @@ export const calculateHorizontalVisibility = (
     const currentGridKey = makeGridKey(row, i);
     const currentTree = treeMap.get(currentGridKey);
     if (currentTree === undefined) {
-      throw new Error(`Couldn't find current tree in tree map. Coords: ${currentGridKey}`);
+      throw new Error(
+        `Couldn't find current tree in tree map. Coords: ${currentGridKey}`
+      );
     }
     if (atTree && currentTree.isAtEdge) {
       isVisibleFromLeft = i === xMin;
@@ -174,33 +179,157 @@ export const calculateHorizontalVisibility = (
       isVisibleFromLeft = compHeight > currentTree.height;
     }
     if (rightOfTree) {
-      isVisibleFromRight = compHeight > currentTree.height;
+      isVisibleFromRight = compHeight >= currentTree.height;
     }
   }
   return {isVisibleFromLeft, isVisibleFromRight};
-}
+};
+
+const getUp = (
+  treeMap: ReadonlyMap<GridKey, Tree>,
+  tree: Tree,
+  yMax: number
+): number => {
+  let upViewingDistance = 0;
+  for (let i = tree.coords.row + 1; i <= yMax; i++) {
+    upViewingDistance++;
+    const currentGridKey = makeGridKey(i, tree.coords.column);
+    const currentTree = treeMap.get(currentGridKey);
+    if (currentTree === undefined) {
+      throw new Error(`Couldn't find current tree`);
+    }
+    if (currentTree.height >= tree.height) {
+      break;
+    }
+  }
+  return upViewingDistance;
+};
+const getDown = (
+  treeMap: ReadonlyMap<GridKey, Tree>,
+  tree: Tree,
+  yMin: number
+): number => {
+  let downViewingDistance = 0;
+  for (let i = tree.coords.row - 1; i >= yMin; i--) {
+    downViewingDistance++;
+    const currentGridKey = makeGridKey(i, tree.coords.column);
+    const currentTree = treeMap.get(currentGridKey);
+    if (currentTree === undefined) {
+      throw new Error(`Couldn't find current tree`);
+    }
+    if (currentTree.height >= tree.height) {
+      break;
+    }
+  }
+  return downViewingDistance;
+};
+const getLeft = (
+  treeMap: ReadonlyMap<GridKey, Tree>,
+  tree: Tree,
+  xMin: number
+): number => {
+  let leftViewingDistance = 0;
+  for (let i = tree.coords.column - 1; i >= xMin; i--) {
+    leftViewingDistance++;
+    const currentGridKey = makeGridKey(tree.coords.row, i);
+    const currentTree = treeMap.get(currentGridKey);
+    if (currentTree === undefined) {
+      throw new Error(`Couldn't find current tree`);
+    }
+    if (currentTree.height >= tree.height) {
+      break;
+    }
+  }
+  return leftViewingDistance;
+};
+const getRight = (
+  treeMap: ReadonlyMap<GridKey, Tree>,
+  tree: Tree,
+  xMax: number
+): number => {
+  let rightViewingDistance = 0;
+  for (let i = tree.coords.column + 1; i <= xMax; i++) {
+    rightViewingDistance++;
+    const currentGridKey = makeGridKey(tree.coords.row, i);
+    const currentTree = treeMap.get(currentGridKey);
+    if (currentTree === undefined) {
+      throw new Error(`Couldn't find current tree`);
+    }
+    if (currentTree.height >= tree.height) {
+      break;
+    }
+  }
+  return rightViewingDistance;
+};
+export const calculateViewingDistances = (
+  treeMap: ReadonlyMap<GridKey, Tree>,
+  tree: Tree,
+  {xMin, xMax, yMin, yMax}: GridBoundary
+): TreeScenicScoreModel => {
+  const upViewingDistance = getUp(treeMap, tree, yMax);
+  const rightViewingDistance = getRight(treeMap, tree, xMax);
+  const downViewingDistance = getDown(treeMap, tree, yMin);
+  const leftViewingDistance = getLeft(treeMap, tree, xMin);
+  return {
+    ...tree,
+    upViewingDistance,
+    rightViewingDistance,
+    downViewingDistance,
+    leftViewingDistance,
+    scenicScore:
+      upViewingDistance *
+      rightViewingDistance *
+      downViewingDistance *
+      leftViewingDistance,
+  };
+};
+
+export const getTreeScenicScoreMap = (
+  treeMap: ReadonlyMap<GridKey, Tree>,
+  gridBoundary: GridBoundary
+): ReadonlyMap<GridKey, TreeScenicScoreModel> => {
+  const treeScenicScoreMap = new Map<GridKey, TreeScenicScoreModel>();
+  treeMap.forEach((tree, key) => {
+    treeScenicScoreMap.set(
+      key,
+      calculateViewingDistances(treeMap, tree, gridBoundary)
+    );
+  });
+  return treeScenicScoreMap;
+};
+
+export const getBestSpotForTheTreeHouseBasedOnScenicScore = (
+  treemap: ReadonlyMap<GridKey, TreeScenicScoreModel>
+): TreeScenicScoreModel => {
+  return [...treemap.values()].sort((prevTree, currTree) => {
+    if (prevTree.scenicScore > currTree.scenicScore) return -1;
+    if (prevTree.scenicScore < currTree.scenicScore) return 1;
+    if (prevTree.scenicScore === currTree.scenicScore) return 0;
+    throw new Error('Unreachable code!');
+  })[0];
+};
 
 export const getTreeVisibilityModelMap = (
   treeMap: ReadonlyMap<GridKey, Tree>,
-  {yMin,yMax,xMin,xMax}: GridBoundary
+  {yMin, yMax, xMin, xMax}: GridBoundary
 ): ReadonlyMap<GridKey, TreeVisibilityModel> => {
   console.time('getTreeVisibilityModelMap');
   const treeVisibilityModelMap = new Map<GridKey, TreeVisibilityModel>();
   treeMap.forEach((tree, key) => {
-    const {
-      isVisibleFromBottom,
-      isVisibleFromTop
-    } = calculateVerticalVisibility(treeMap, tree, yMin, yMax);
-    const {
-      isVisibleFromLeft,
-      isVisibleFromRight
-    } = calculateHorizontalVisibility(treeMap, tree, xMin, xMax);
+    const {isVisibleFromBottom, isVisibleFromTop} = calculateVerticalVisibility(
+      treeMap,
+      tree,
+      yMin,
+      yMax
+    );
+    const {isVisibleFromLeft, isVisibleFromRight} =
+      calculateHorizontalVisibility(treeMap, tree, xMin, xMax);
     treeVisibilityModelMap.set(key, {
       ...tree,
       isVisibleFromTop,
       isVisibleFromLeft,
       isVisibleFromBottom,
-      isVisibleFromRight
+      isVisibleFromRight,
     });
   });
   console.timeEnd('getTreeVisibilityModelMap');
@@ -213,24 +342,26 @@ export const getVisibleTreesCount = (
 ): number => {
   console.time('getVisibleTreesCount');
   let visibleTreesCount = 0;
-  treeVisibilityModelMap.forEach(({
-    isVisibleFromTop,
-    isVisibleFromLeft,
-    isVisibleFromBottom,
-    isVisibleFromRight,
-    isAtEdge
-  }) => {
-    if (countType === 'interior-only' && isAtEdge) return;
-    if (countType === 'edge-only' && isAtEdge === false) return;
-    if (
-      isVisibleFromTop
-      || isVisibleFromRight
-      || isVisibleFromBottom
-      || isVisibleFromLeft
-    ) {
-      visibleTreesCount++;
+  treeVisibilityModelMap.forEach(
+    ({
+      isVisibleFromTop,
+      isVisibleFromLeft,
+      isVisibleFromBottom,
+      isVisibleFromRight,
+      isAtEdge,
+    }) => {
+      if (countType === 'interior-only' && isAtEdge) return;
+      if (countType === 'edge-only' && isAtEdge === false) return;
+      if (
+        isVisibleFromTop ||
+        isVisibleFromRight ||
+        isVisibleFromBottom ||
+        isVisibleFromLeft
+      ) {
+        visibleTreesCount++;
+      }
     }
-  });
+  );
   console.timeEnd('getVisibleTreesCount');
   return visibleTreesCount;
-}
+};

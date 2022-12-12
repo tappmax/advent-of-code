@@ -23,6 +23,14 @@ export interface TreeVisibilityModel extends Tree {
   readonly isVisibleFromLeft: boolean;
 }
 
+export interface TreeScenicScoreModel extends Tree {
+  readonly upViewingDistance: number;
+  readonly rightViewingDistance: number;
+  readonly downViewingDistance: number;
+  readonly leftViewingDistance: number;
+  readonly scenicScore: number;
+}
+
 export interface GridBoundary {
   readonly xMin: number;
   readonly xMax: number;
