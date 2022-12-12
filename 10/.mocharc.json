@@ -1,0 +1,19 @@
+{
+  "diff": true,
+  "extension": ["js", "cjs", "mjs", "ts"],
+  "package": "./package.json",
+  "reporter": "spec",
+  "slow": "75",
+  "timeout": "2000",
+  "ui": "bdd",
+  "loader": "ts-node/esm",
+  "watch-files": [
+    "lib/**/*.js",
+    "**/*.spec.ts",
+    "test/**/*.js"
+  ],
+  "watch-ignore": [
+    "node_modules",
+    "build"
+  ]
+}
