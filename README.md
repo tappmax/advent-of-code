@@ -29,8 +29,8 @@ I accidentally deleted the first 3 days' solutions trying to set up a branch on 
 | 04 | Complete ||
 | 05 | Complete ||
 | 06 | Complete ||
-| 07 | Stumped, didn't get part 1 answer | No clue what is wrong, all tests are passing and matching the site's data, wth |
+| 07 | Stumped, didn't get part 1 answer | No clue what is wrong, all tests are passing and matching the site's data, wth. Wow.. folders and file names are not unique |
 | 08 | Done | using a map instead of 2d array again. I'm not smart enough for 2d arrays |
 | 09 | Not Started | This looks kinda tedious, I'll have to get pretty bored for this one. I'd probably recreate the first three days before this. |
-| 10 | Started, part 1 complete | Oh wow, part 2 looks rough. |
+| 10 | Done | ezpz |
 | 11 | Not started | monkey business! |

@@ -39,11 +39,12 @@ export const getIO = (
   } as ICmdOutput;
 };
 
-export const stringToCmdIO = (input: string): ICmdIO => {
+export const stringToCmdIO = (input: string, index: number): ICmdIO => {
   const isCommand = input[0] === '$';
   return {
     isCommand,
     io: getIO(isCommand, input),
+    id: index
   } as ICmdIO;
 };
 
@@ -55,17 +56,17 @@ export const cdIsUp = (cmd: ICmdInput): boolean => cmd.toDirectory === '..';
 
 export const getHydratedDirectoryMap = (
   ioList: ICmdIO[]
-): ReadonlyMap<string, Directory> => {
+): Array<Directory> => {
   console.time('getHydratedDirectoryMap');
-  const directoryMap = new Map<string, Directory>();
+  const directories = [] as Directory[];
   // we know the first command is to enter the top-most directory.
   // All other directories will have parents
-  directoryMap.set('/', new Directory(null, '/'));
-  let currentDirectory = directoryMap.get('/');
+  directories.push(new Directory(null, '/', 0));
+  let currentDirectory = directories[0];
   try {
     for (let i = 1; i < ioList.length; i++) {
       if (typeof currentDirectory === 'undefined') {
-        console.log({ds: directoryMap.values()});
+        console.log({ds: directories.values()});
         throw new Error(
           `Current directory cannot be undefined. Prev cmdIO: ${JSON.stringify(
             ioList[i - 1]
@@ -73,6 +74,7 @@ export const getHydratedDirectoryMap = (
         );
       }
       const cmd = ioList[i];
+      const id = cmd.id;
       if (isCmdIoListContents(cmd)) {
         let indexOfNextIO = i + 1;
         let nextIOIsCommand = ioList[indexOfNextIO].isCommand;
@@ -81,8 +83,8 @@ export const getHydratedDirectoryMap = (
           // add files and directories
           const cmdOutput = nextIO.io as ICmdOutput;
           if (cmdOutput.dirName) {
-            const newDir = new Directory(currentDirectory, cmdOutput.dirName);
-            directoryMap.set(cmdOutput.dirName, newDir);
+            const newDir = new Directory(currentDirectory, cmdOutput.dirName, id);
+            directories.push(newDir);
             currentDirectory.addChild(newDir);
           }
           if (cmdOutput.file) {
@@ -104,16 +106,17 @@ export const getHydratedDirectoryMap = (
         const cmdInput = cmd.io as ICmdInput;
         if (cdIsUp(cmdInput)) {
           if (currentDirectory.parentDirectory === null) {
+            console.log(currentDirectory, cmdInput);
             throw new Error('Parent directory cannot be null');
           }
-          const parentDirName = currentDirectory.parentDirectory.dirName;
-          currentDirectory = directoryMap.get(parentDirName);
+          currentDirectory =  currentDirectory.parentDirectory;
           continue;
         }
         if (typeof cmdInput.toDirectory === 'undefined') {
           throw new Error('toDirectory should not be undefined');
         }
-        currentDirectory = directoryMap.get(cmdInput.toDirectory);
+        // TODO: this is wrong
+        currentDirectory = directories.find(x => x.dirName === cmdInput.toDirectory) as Directory;
         continue;
       }
     }
@@ -122,11 +125,11 @@ export const getHydratedDirectoryMap = (
   } finally {
     console.timeEnd('getHydratedDirectoryMap');
   }
-  return directoryMap;
+  return directories;
 };
 
 export const getDirectorySum = (
-  directoryMap: ReadonlyMap<string, Directory>,
+  directoryMap: Directory[],
 ): number => {
   const threshold = 100000;
   let sum = 0;

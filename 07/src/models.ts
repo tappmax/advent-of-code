@@ -6,6 +6,7 @@ export interface IFile {
 export interface ICmdIO {
   readonly isCommand: boolean;
   readonly io: ICmdInput | ICmdOutput;
+  readonly id: number;
 }
 
 export interface ICmdInput {
@@ -25,7 +26,8 @@ export class Directory {
 
   constructor(
     readonly parentDirectory: Directory | null,
-    readonly dirName: string
+    readonly dirName: string,
+    readonly id: number
   ) {}
 
   public addFile(file: IFile): void {

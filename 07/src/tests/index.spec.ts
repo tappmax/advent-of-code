@@ -53,7 +53,8 @@ describe(`Test`, () => {
         ['d', 24933642],
       ]);
       expectations.forEach((expected, dirName) => {
-        expect(expected).to.equal(directoryMap.get(dirName)?.getDirectorySize());
+        const dir = directoryMap.find(x => x.dirName === dirName);
+        expect(expected).to.equal(dir?.getDirectorySize());
       });
     });
     it(`shouldn't sum them if it exceeds threshold`, () => {
