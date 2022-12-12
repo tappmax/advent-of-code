@@ -39,16 +39,24 @@ export const main = (): number => {
     });
     xRegister += numberToAdd;
   }
-  const cyclesToSum = [20, 60, 100, 140, 180, 220];
-  const sixSignalStrengthSum = cyclesToSum.reduce((acc, curr) => {
-    console.log({acc, curr, cycle: cycles[curr - 1]});
-    return (acc += cycles[curr-1].X * curr);
-  }, 0);
-  console.log(sixSignalStrengthSum);
+  let drawing = '';
+  let monitorColumn = 0;
+  const darkPixel = '.';
+  const lightPixel = '#';
+  for (let i = 0; i < cycles.length; i++) {
+    const {X} = cycles[i];
+    const sprite = [Math.max(X-1, 0), X, Math.min(X + 1, cycles.length)];
+    const isSpriteByPixel = sprite.includes(monitorColumn);
+    drawing += isSpriteByPixel ? lightPixel : darkPixel;
+    monitorColumn++;
+    if (monitorColumn % 40 === 0) {
+      drawing += '\n';
+      monitorColumn = 0;
+    }
+  }
+  console.log(drawing);
   return 0;
 };
 
 // for node runs
 main();
-
-// try 14420 after 7:45
